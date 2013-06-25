@@ -61,6 +61,11 @@ def is_int32_list(val):
     return list_validator(val, is_int32)
 
 
+def boolean_list_validator(val, list_validator):
+    is_bool = val[:val.index(' ')].lower() in ['true', 'faslse', 'on', 'off']
+    return is_bool and list_validator(val[val.index(' ') + 1:])
+
+
 def get_dhcp_aa(obj):
     members = dir(obj)
     aa = []

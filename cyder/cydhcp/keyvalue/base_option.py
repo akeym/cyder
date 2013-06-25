@@ -5,7 +5,7 @@ from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import (is_valid_ip, is_ip_list, is_int32,
                                          is_valid_domain, is_domain_list,
-                                         is_int32_list)
+                                         is_int32_list, boolean_list_validator)
 
 
 class CommonOption(KeyValue, ObjectUrlMixin):
@@ -112,7 +112,7 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_statement = False
         self.has_validator = True
         val = self._get_value()
-        if not is_ip_list(val):
+        if not (is_ip_list(val) or is_domain_list(val)):
             raise ValidationError("The ntp servers options {0} "
                                   "are not a valid ip list".format(val))
 
@@ -128,7 +128,7 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_statement = False
         self.has_validator = True
         val = self._get_value()
-        if not is_ip_list(val):
+        if not (is_ip_list(val) or is_domain_list(val)):
             raise ValidationError("The DNS servers options {0} "
                                   "are not a valid ip list".format(val))
 
@@ -294,11 +294,7 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         """
         self.is_option = True
         self.is_statement = False
-        self.has_validator = True
-        val = self._get_value()
-        if not is_ip_list(val):
-            raise ValidationError("The time-servers options {0} "
-                                  "are not a valid ip list".format(val))
+        self.has_validator = False
 
     def _aa_always_reply_rfc1048(self):
         """
@@ -390,8 +386,8 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_statement = False
         self.has_validator = True
         val = self._get_value()
-        if not is_ip_list(val):
-            raise ValidationError("The time-servers options {0} "
+        if not boolean_list_validator(val, is_ip_list):
+            raise ValidationError("The slp-director agent options {0} "
                                   "are not a valid ip list".format(val))
 
     def _aa_slp_scope(self):

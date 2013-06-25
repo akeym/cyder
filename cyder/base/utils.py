@@ -1,6 +1,8 @@
 import operator
 import urllib
 import urlparse
+import shlex
+import subprocess
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
@@ -16,6 +18,20 @@ from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
+
+
+def shell_out(command, use_shlex=True):
+    """A little helper function that will shell out and return stdout
+,
+    stderr and the return code."""
+    if use_shlex:
+        command_args = shlex.split(command)
+    else:
+        command_args = command
+    p = subprocess.Popen(command_args, stderr=subprocess.PIPE,
+                         stdout=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    return stdout, stderr, p.returncode
 
 
 def find_get_record_url(obj):

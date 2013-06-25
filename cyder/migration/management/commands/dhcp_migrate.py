@@ -258,23 +258,52 @@ def migrate_zones():
 
 def migrate_dynamic_hosts():
     print "Migrating dynamic hosts."
+    default, _ = Workgroup.objects.get_or_create(name='default')
     cursor.execute("SELECT dynamic_range, name, domain, ha, location, "
                    "workgroup, zone, enabled FROM host WHERE ip = 0")
     res = cursor.fetchall()
     for range_id, name, domain_id, mac, loc, workgroup_id, zone_id, en in res:
-        """
-        r = maintain_find_range(range_id)
-        c = maintain_find_zone(zone_id) if zone_id else None
-        d = maintain_find_domain(domain_id) if domain_id else None
-        w = maintain_find_workgroup(workgroup_id) if workgroup_id else None
-        s, _ = System.objects.get_or_create(name=name, location=loc)
-        """
-        if not all([range_id, zone_id, domain_id, workgroup_id]):
-            print "Trouble migrating host with mac {0}".format(mac)
-        r = maintain_find_range(range_id)
-        c = maintain_find_zone(zone_id)
-        d = maintain_find_domain(domain_id)
-        w = maintain_find_workgroup(workgroup_id) if workgroup_id else None
+
+        if not range_id:
+            print ("host with mac {0} "
+                   "has no dynamic_range in maintain".format(mac))
+            r = None
+        else:
+            r = maintain_find_range(range_id)
+            if not r:
+                print ("host with mac {0} has "
+                       "no dynamic range in cyder".format(mac))
+
+        if not zone_id:
+            print "host with mac {0} has no zone id".format(mac)
+            c = None
+        else:
+            c = maintain_find_zone(zone_id)
+            if not c:
+                print ("host with mac {0} has "
+                       "no ctnr in cyder".format(mac))
+                print "failed to migrate zone_id {0}".format(zone_id)
+
+        if not domain_id:
+            print "host with mac {0} has no domain id".format(mac)
+            d = None
+        else:
+            d = maintain_find_domain(domain_id)
+            if not d:
+                print ("host with mac {0} has "
+                       "no domain in cyder".format(mac))
+                print "failed to migrate domain_id {0}".format(domain_id)
+
+        if not workgroup_id:
+            print "host with mac {0} has no workgroup id".format(mac)
+            w = default
+        else:
+            w = maintain_find_workgroup(workgroup_id)
+            if not w:
+                print ("host with mac {0} has "
+                       "no workgroup in cyder".format(mac))
+                print ("failed to migrate workgroup_id {0}\n"
+                       "adding it to the default group".format(workgroup_id))
 
         s, _ = System.objects.get_or_create(name=name, location=loc)
         if r.allow == 'vrf':
