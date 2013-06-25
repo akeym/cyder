@@ -62,7 +62,7 @@ def is_int32_list(val):
 
 
 def boolean_list_validator(val, list_validator):
-    is_bool = val[:val.index(' ')].lower() in ['true', 'faslse', 'on', 'off']
+    is_bool = val[:val.index(' ')].lower() in ['true', 'false', 'on', 'off']
     return is_bool and list_validator(val[val.index(' ') + 1:])
 
 
